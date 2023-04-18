@@ -2,6 +2,7 @@
 data:
   name: semantickitti
   path: /media/julessanchez/HDD/SemanticKITTI
+  traj_folder : new_traj_semantickitti
 
 labels: 
   0 : "unlabeled"

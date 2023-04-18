@@ -26,6 +26,7 @@ class nuScenes(PointCloudDataset):
             self.build_scene_json()
             with open(self.path+'/v1.0-trainval/scene2label.json', 'r') as json_file:
                 self.scenes = json.load(json_file)
+        self.traj_folder = config.data.traj_folder
 
     def build_scene_json(self):
         #we are using a custom dictionnary top map sequences to their annotated frames
@@ -88,4 +89,4 @@ class nuScenes(PointCloudDataset):
         return len(self.scenes[self.sequence[seq_number]]['label'])
 
     def get_poses_seq(self, seq_number):
-        return read_transfo(osp.join(osp.join(self.path,'new_traj_nuscenes'),self.sequence[seq_number]+'_traj_complete_resul.txt'),False)
+        return read_transfo(osp.join(osp.join(self.path,self.traj_folder),self.sequence[seq_number]+'_traj_complete_resul.txt'),False)

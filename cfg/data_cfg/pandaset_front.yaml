@@ -1,6 +1,7 @@
 data:
   name: pandaset_front
   path: /media/julessanchez/HDD/PS_front
+  traj_folder : traj_pandaset
 
 labels: 
   0: Unknown

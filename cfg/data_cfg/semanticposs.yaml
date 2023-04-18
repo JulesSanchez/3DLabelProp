@@ -1,6 +1,7 @@
 data:
   name: semanticposs
   path: /media/julessanchez/HDD/SemanticPOSS
+  traj_folder : traj_semanticposs
   
 labels:
   0: "unlabeled"

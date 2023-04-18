@@ -1,6 +1,7 @@
 data:
   name: pandaset_rotate
   path: /media/julessanchez/HDD/PS_rotate
+  traj_folder : traj_pandaset
 
 labels: 
   0: Unknown

@@ -17,6 +17,7 @@ class SemanticKITTI(PointCloudDataset):
         self.sequence.extend(config.split[self.split])
         self.sequence = [str(s).zfill(2) for s in self.sequence]
         self.path = config.data.path
+        self.traj_folder = config.data.traj_folder
         self.dynamic = np.array(dynamic)
 
     def loader(self, seq, frame):
@@ -52,4 +53,4 @@ class SemanticKITTI(PointCloudDataset):
         return len(os.listdir(osp.join(self.path,'dataset/sequences',str(self.sequence[seq_number]).zfill(2),'velodyne')))
 
     def get_poses_seq(self, seq_number):
-        return read_transfo(osp.join(osp.join(self.path,'new_traj_semantickitti'),'_'+str(self.sequence[seq_number]).zfill(2)+'_traj_complete_result_in_lidar_frame.txt'),False)
+        return read_transfo(osp.join(osp.join(self.path,self.traj_folder),str(self.sequence[seq_number]).zfill(2)+'_traj.txt'),False)

@@ -15,6 +15,7 @@ class Pandaset(PointCloudDataset):
         self.sequence.extend(config.split[self.split])
         self.sequence = [str(s).zfill(3) for s in self.sequence]
         self.path = config.data.path
+        self.traj_folder = config.data.traj_folder
 
     def loader(self, seq, frame):
         ply = read_ply((os.path.join(self.path,str(seq).zfill(3),str(frame).zfill(2)+'.ply')))
@@ -36,4 +37,4 @@ class Pandaset(PointCloudDataset):
         return len(os.listdir(osp.join(self.path,str(self.sequence[seq_number]).zfill(3))))
 
     def get_poses_seq(self, seq_number):
-        return read_transfo(osp.join(osp.join(self.path,'traj_pandaset'),str(self.sequence[seq_number]).zfill(3)+'_traj_complete_result.txt'),False)
+        return read_transfo(osp.join(osp.join(self.path,self.traj_folder),str(self.sequence[seq_number]).zfill(3)+'_traj_complete_result.txt'),False)

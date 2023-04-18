@@ -1,6 +1,7 @@
 data:
   name: nuscenes
   path: /media/julessanchez/HDD/nuscenes
+  traj_folder : new_traj_nuscenes
   
 labels: 
   0: 'noise'
