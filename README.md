@@ -15,17 +15,20 @@ This code was tested with CUDA 11.1
 
 ### Python requirements
 
--install torchsparse https://github.com/mit-han-lab/torchsparse
--install pytorch, here with conda
+- install torchsparse https://github.com/mit-han-lab/torchsparse
+- install pytorch, here with conda
+
 `conda create --name pytorch python=3.7`
 `conda activate pytorch`
 `conda install pytorch==1.7.0 torchvision torchaudio cudatoolkit=11.0 -c pytorch`
--install other requirements
+- install other requirements
+
 `pip install -r requirements.txt`
 
 ### Compilation of C++
 
 `cd cpp_wrappers`
+
 `bash compile_wrappers.sh`
 
 ## Usage
