@@ -19,7 +19,9 @@ This code was tested with CUDA 11.1
 - install pytorch, here with conda
 
 `conda create --name pytorch python=3.7`
+
 `conda activate pytorch`
+
 `conda install pytorch==1.7.0 torchvision torchaudio cudatoolkit=11.0 -c pytorch`
 - install other requirements
 
@@ -34,28 +36,33 @@ This code was tested with CUDA 11.1
 ## Usage
 
 ### Train
-Be careful, for training, we preprocess the dataset, for SemanticKITTI with default parameters, it takes approximately 200Go.
-Change the paths appropriately in the various config files.
-Traj files can be found in: XXX. Put the unzipped folder at the root of the dataset.
+Be careful, for training, we preprocess the dataset. For example, for SemanticKITTI with the default parameters, you need approximately 200Go of free storage.
 
-By default, train a model on semantickitti with KPConv.
+Change the paths appropriately in the various config files (./cfg).
 
-`train.py`
+Trajectory files can be found in: XXX. 
+
+Put the unzipped folder at the root of the dataset.
+
+By default, to train a model on SemanticKITTI with KPConv use:
+
+`python train.py`
 
 ### Inference
 Be careful, by default, inferences as saved on disk for future use.
+
 Change the paths appropriately in the various config files.
 
-By default, infer a model trained on semantickitti with KPConv on semantickitti
+By default, to infer a model trained on SemanticKITTI with KPConv on SemanticKITTI use:
 
-`infer.py`
+`python infer.py`
 
 ## Trained models
-Trained models on semantickitti and nuscenes with KPConv can be found at XXX.
+Trained models on SemanticKITTI and nuScenes with KPConv can be found at XXX.
 
 ## Credits
 
-Thanks for the original authors of KPConv (https://github.com/HuguesTHOMAS/KPConv-PyTorch) from which we copied the KPConv backbone code and SPVCNN (https://github.com/mit-han-lab/spvnas) from which we copied the SPVCNN backbone code.
+Thanks to the original authors of KPConv (https://github.com/HuguesTHOMAS/KPConv-PyTorch) from which we copied the KPConv backbone code and SPVCNN (https://github.com/mit-han-lab/spvnas) from which we copied the SPVCNN backbone code.
 
 If you use this repo please cite us:
 
