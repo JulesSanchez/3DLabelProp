@@ -1,0 +1,83 @@
+data:
+  name: semanticposs
+  path: /media/julessanchez/HDD/SemanticPOSS
+  
+labels:
+  0: "unlabeled"
+  4: "1 person"
+  5: "2+ person"
+  6: "rider"
+  7: "car"
+  8: "trunk"
+  9: "plants"
+  10: "traffic sign 1" # standing sign
+  11: "traffic sign 2" # hanging sign
+  12: "traffic sign 3" # high/big hanging sign
+  13: "pole"
+  14: "garbage-can"
+  15: "building"
+  16: "cone/stone"
+  17: "fence"
+  21: "bike"
+  22: "ground"
+  1: "unlabeled"
+  2: "unlabeled" 
+  3: "unlabeled" 
+  18: "unlabeled"
+  19: "unlabeled"
+  20: "unlabeled"
+
+learning_map:
+  0: 0  # "unlabeled",
+  1: 0
+  2: 0
+  3: 0
+  4: 1  # "person",
+  5: 1  # "person",
+  6: 2   # "rider",
+  7: 3   # "car",
+  8: 4   # "trunk",
+  9: 5   # "plants",
+  10: 6   #  "traffic sign"
+  11: 6   #  "traffic sign"
+  12: 6   #  "traffic sign"
+  13: 7   #  "pole",
+  14: 8   #  "garbage-can",
+  15: 9   #  "building",
+  16: 10   #  "cone/stone",
+  17: 11  #  "fence",
+  18: 0
+  19: 0
+  20: 0
+  21: 12  #  "bike",
+  22: 13  #  "ground"
+
+learning_ignore: # Ignore classes
+  0: True      # "unlabeled", and others ignored
+  1: False     # "car"
+  2: False     # "bicycle"
+  3: False     # "motorcycle"
+  4: False     # "truck"
+  5: False     # "other-vehicle"
+  6: False     # "person"
+  7: False     # "bicyclist"
+  8: False     # "motorcyclist"
+  9: False     # "road"
+  10: False    # "parking"
+  11: False    # "sidewalk"
+  12: False    # "other-ground"
+  13: False    # "building"
+  14: False    # "fence"
+  15: False    # "vegetation"
+  16: False    # "trunk"
+  17: False    # "terrain"
+  18: False    # "pole"
+  19: False    # "traffic-sign"
+split: # sequence numbers
+  valid:
+    - 3
+    - 0
+    - 1
+    - 2
+    - 4
+    - 5

@@ -1,0 +1,4 @@
+*.cython
+*.so
+*__pycache__
+*build

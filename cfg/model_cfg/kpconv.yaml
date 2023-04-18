@@ -1,0 +1,23 @@
+architecture:
+  model: KPCONV #KPCONV or SPVCNN
+  type: KPFCNN #Config to fetch
+trainer:
+  epoch: 350000
+  batch_size: 1
+  lr: 0.002
+  min_lr: 0.0001
+  epoch_lr: 350000
+  optimizer: SGD
+  momentum: 0.98
+  weight_decay: 0.0001
+  balanced: True
+  criterion: Lovasz_weighted
+  evaluate_timing: 15000
+  evaluate_size: 400
+  scheduler: ConsineAnnealing
+  step_size: 1200
+  resume: 0
+logger:
+  run_name: test
+  save_path: ./results
+  model_name: occupation.pth
