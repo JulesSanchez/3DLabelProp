@@ -55,8 +55,10 @@ Trained models on semantickitti and nuscenes with KPConv can be found at XXX.
 
 ## Credits
 
-Thanks for the original authors of KPConv (https://github.com/HuguesTHOMAS/KPConv-PyTorch) and SPVCNN (https://github.com/mit-han-lab/spvnas) from which we 
+Thanks for the original authors of KPConv (https://github.com/HuguesTHOMAS/KPConv-PyTorch) from which we copied the KPConv backbone code and SPVCNN (https://github.com/mit-han-lab/spvnas) from which we copied the SPVCNN backbone code.
+
 If you use this repo please cite us:
+
 @misc{sanchez2023domain,
       title={Domain generalization of 3D semantic segmentation in autonomous driving}, 
       author={Jules Sanchez and Jean-Emmanuel Deschaud and Francois Goulette},
