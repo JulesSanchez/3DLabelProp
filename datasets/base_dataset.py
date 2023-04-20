@@ -27,3 +27,6 @@ class PointCloudDataset:
 
     def get_size_seq(self):
         pass
+
+    def get_class_names(self):
+        pass

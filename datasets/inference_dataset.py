@@ -85,7 +85,7 @@ class InferenceDataset:
     def __init__(self, config, dataset, model, config_model):
         self.config = config 
         self.dataset = dataset 
-        self.save = osp.join(self.config.save_pred_path,self.config.source,self.config.logger.model_name)
+        self.save = osp.join(self.config.save_pred_path,self.dataset.config.data.name,self.config.logger.model_name)
         self.n_label = self.dataset.get_n_label()
         self.model = model 
         if torch.cuda.is_available():
@@ -193,7 +193,7 @@ class InferenceDataset:
             accumulated_confidence = np.concatenate((accumulated_confidence,np.zeros(len(pointcloud))))
 
             acc_label = np.copy(accumulated_pointcloud[:,4].astype(np.int32))
-            acc_label, new_conf = compute_labels(accumulated_pointcloud, acc_label, accumulated_confidence, len(pointcloud), self.config.sequence.voxel_size, self.n_label, self.dataset.config.data.name, self.config.sequence.dist_prop)
+            acc_label, new_conf = compute_labels(accumulated_pointcloud, acc_label, accumulated_confidence, len(pointcloud), self.config.sequence.voxel_size, self.n_label, self.config.source, self.config.sequence.dist_prop)
 
 
             dynamic_indices = np.where(self.dataset.get_dynamic(acc_label))[0]

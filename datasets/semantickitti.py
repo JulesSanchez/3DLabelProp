@@ -10,9 +10,14 @@ class SemanticKITTI(PointCloudDataset):
         self.split = split
         self.config = config
         learning_map = config.learning_map
+        label_map_names = config.labels
         self.map = np.zeros(max(learning_map.keys())+1)
+        self.label_names = {}
         for key in learning_map:
             self.map[key] = learning_map[key]
+            if learning_map[key] not in self.label_names and learning_map[key] !=0:
+                self.label_names[learning_map[key]] = label_map_names[key]
+        self.label_names = list(self.label_names.values())
         self.sequence = []
         self.sequence.extend(config.split[self.split])
         self.sequence = [str(s).zfill(2) for s in self.sequence]

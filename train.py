@@ -1,5 +1,6 @@
 import importlib
 import argparse
+from random import shuffle
 from omegaconf import OmegaConf
 import os.path as osp
 from datasets.cluster_dataset import *
@@ -42,35 +43,11 @@ elif cfg.architecture.model == "SPVCNN":
     model_information.ignore_label = -1
 else:
     raise  NameError('model not supported')
-def collate(data):
-    r_clouds, _ = model.prepare_data(data,augment=False,eval=True)
-    return r_clouds
-def collate_val(data):
-    r_clouds, r_inds = model.prepare_data(data,augment=False,eval=True)
-    return r_clouds, data, r_inds
-
 
 #Get info relative to the cluster set (for training)
 train_dataset = ClusterDataset(cfg,train_set)
 valid_dataset = ClusterDataset(cfg,val_set)
-tr_samplr = BalancedSampler(train_dataset.class_frames, 1, train_set.get_n_label())
-
-#Generate dataloader
-train_dataloader = InfiniteDataLoader(
-                        train_dataset,
-                        sampler = tr_samplr,
-                        batch_size=cfg.trainer.batch_size,
-                        num_workers=8,
-                        collate_fn=collate
-                    )
-    
-valid_dataloader = torch.utils.data.DataLoader(
-                        valid_dataset,
-                        num_workers=8,
-                        sampler=torch.utils.data.SubsetRandomSampler(np.random.choice(len(valid_dataset),cfg.trainer.evaluate_size,replace=False)),
-                        collate_fn=collate_val,
-                        batch_size=cfg.trainer.batch_size
-                    )
+tr_samplr = BalancedSampler(train_dataset.class_frames, train_set.get_n_label(),shuffle=50000, batch_size=cfg.trainer.batch_size)
 
 if cfg.architecture.model == "KPCONV":
     from models.kpconv_model import SemanticSegmentationModel
@@ -81,5 +58,31 @@ elif cfg.architecture.model == "SPVCNN":
     from models.spvcnn_model import SemanticSegmentationSPVCNNModel
     model = SemanticSegmentationSPVCNNModel(model_information,cfg)
 
-#trainer = Trainer(model,train_dataloader,valid_dataloader,cfg)
-#trainer.iteration_train()
+def collate(data):
+    r_clouds, _ = model.prepare_data(data,augment=False,eval=True)
+    return r_clouds
+def collate_val(data):
+    r_clouds, r_inds = model.prepare_data(data,augment=False,eval=True)
+    return r_clouds, data, r_inds
+
+#Generate dataloader
+train_dataloader = InfiniteDataLoader(
+                        train_dataset,
+                        #batch_sampler = tr_samplr,
+                        num_workers=16,
+                        collate_fn=collate,
+                        batch_size=cfg.trainer.batch_size,
+                        shuffle=True
+                    )
+    
+valid_dataloader = torch.utils.data.DataLoader(
+                        valid_dataset,
+                        num_workers=16,
+                        sampler=torch.utils.data.SubsetRandomSampler(np.random.choice(len(valid_dataset),cfg.trainer.evaluate_size,replace=False)),
+                        collate_fn=collate_val,
+                        batch_size=cfg.trainer.batch_size
+                    )
+
+
+trainer = Trainer(model,train_dataloader,valid_dataloader,cfg)
+trainer.iteration_train()

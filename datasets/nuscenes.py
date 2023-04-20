@@ -11,12 +11,17 @@ class nuScenes(PointCloudDataset):
         self.split = split
         self.config = config
         learning_map = config.learning_map
+        label_map_names = config.labels
         self.map = np.zeros(max(learning_map.keys())+1)
+        self.label_names = {}
         for key in learning_map:
             self.map[key] = learning_map[key]
+            if learning_map[key] not in self.label_names and learning_map[key] !=0:
+                self.label_names[learning_map[key]] = label_map_names[key]
+        self.label_names = list(self.label_names.values())
         self.sequence = []
         self.sequence.extend(config.split[self.split])
-        self.sequence = ['scene-'+str(s).zfill(4) for s in self.sequence]
+        self.sequence = ['scene-'+s for s in self.sequence]
         self.path = config.data.path
         self.dynamic = np.array(dynamic)
         if os.path.exists(osp.join(self.path,'v1.0-trainval','scene2label.json')):
@@ -58,7 +63,7 @@ class nuScenes(PointCloudDataset):
 
     def loader(self, seq, idx):
         #return a tuple (pcd,labels), pcd shape = (nx4), labels shape (n)
-        info = self.scene[seq]
+        info = self.scenes[seq]
         pointcloud = osp.join(self.path,info['file'][idx])
         pointcloud = np.fromfile(pointcloud, dtype=np.float32).reshape((-1, 5))[:, :4]
         label = osp.join(self.path,info['label'][idx])
@@ -89,4 +94,4 @@ class nuScenes(PointCloudDataset):
         return len(self.scenes[self.sequence[seq_number]]['label'])
 
     def get_poses_seq(self, seq_number):
-        return read_transfo(osp.join(osp.join(self.path,self.traj_folder),self.sequence[seq_number]+'_traj_complete_resul.txt'),False)
+        return read_transfo(osp.join(osp.join(self.path,self.traj_folder),self.sequence[seq_number]+'_traj_complete_result.txt'),False)

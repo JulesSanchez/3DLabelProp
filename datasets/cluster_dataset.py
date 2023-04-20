@@ -33,27 +33,27 @@ class BalancedSampler(object):
     returns the length of the returned iterators.
     """
 
-    def __init__(self, data_source, batch_size,n_label,shuffle=True):
+    def __init__(self, data_source,n_label,shuffle=50000,batch_size=1):
         self.data_source = data_source #list of lists
-        self.batch_size = batch_size
         self.n_label = n_label
         self.reshuffle = shuffle
+        self.batch_size=batch_size
         try:
             self.data_source = [ds.tolist() for ds in data_source]
         except:
             self.data_source = data_source
 
     def __iter__(self):
-        batch = []
         lbl_curr = 0
         counter = [0 for _ in range(self.n_label)]
         c = 0
         self.data_source = [random.sample(ds,len(ds)) for ds in self.data_source]
+        batch = []
         for _ in range(sum([len(ds) for ds in self.data_source])):
             if len(batch) == self.batch_size:
                 yield batch
                 batch = []
-            batch.append(self.data_source[lbl_curr][counter[lbl_curr]])
+            batch.append(int(self.data_source[lbl_curr][counter[lbl_curr]]))
             counter[lbl_curr] = (counter[lbl_curr] + 1) % len(self.data_source[lbl_curr])
             if counter[lbl_curr] == 0:
                 self.data_source[lbl_curr] = random.sample(self.data_source[lbl_curr],len(self.data_source[lbl_curr]))
@@ -82,22 +82,26 @@ class ClusterDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.datalist) 
 
+    def get_class_names(self):
+        return self.dataset.label_names
+
     def __getitem__(self, index):
-        idx = self.datalist[index,:-1]
-        seq = idx//(self.n_clust_max*self.size_seq_max)
-        scan = (idx-seq*self.n_clust_max*self.size_seq_max)//self.n_clust_max
-        cluster_number = idx%self.n_clust_max
+        index = int(self.datalist[index,-1])
+        seq = index//(self.n_clust_max*self.size_seq_max)
+        scan = (index-seq*self.n_clust_max*self.size_seq_max)//self.n_clust_max
+        cluster_number = index%self.n_clust_max
         return self.get_cluster(seq,scan,cluster_number)
 
     def get_cluster(self,seq_number,frame_number,cluster_number):
         try:
             return np.fromfile(osp.join(self.cluster_path,self.dataset.sequence[seq_number],str(frame_number)+'_'+str(cluster_number)+'.bin'),dtype=np.float32).reshape(-1,6)
         except:
-            return None
+            #return None
+            raise NameError("Cluster : " + str(self.dataset.sequence[seq_number]) + "_" + str(frame_number)+ "_"  + str(cluster_number) + " not found")
 
     def get_dataset(self):
-        self.size_seq_max = max([self.dataset.get_size_seq(s) for s in range(len(self.dataset.sequence))]) + 1
-        self.n_clust_max = self.config.cluster.n_centroids + 1
+        self.size_seq_max = max([self.dataset.get_size_seq(s) for s in range(len(self.dataset.sequence))])
+        self.n_clust_max = self.config.cluster.n_centroids
         self.total = 0
         for seq in self.dataset.sequence:
             seq_path = osp.join(self.cluster_path, seq) 
@@ -124,6 +128,8 @@ class ClusterDataset(torch.utils.data.Dataset):
             with open(seq_stat_file, 'rb') as f:
                 self.datalist = np.load(f)
                 self.total = len(self.datalist)
+                self.n_clust_max = self.config.cluster.n_centroids
+                self.size_seq_max = max([self.dataset.get_size_seq(s) for s in range(len(self.dataset.sequence))]) 
         else:
             self.get_dataset()
             self.datalist = np.zeros((self.total, self.n_label+1))
@@ -208,7 +214,7 @@ class ClusterDataset(torch.utils.data.Dataset):
             accumulated_confidence = np.concatenate((accumulated_confidence,np.zeros(len(pointcloud))))
 
             acc_label = np.copy(accumulated_pointcloud[:,4].astype(np.int32))
-            acc_label, accumulated_confidence = compute_labels(accumulated_pointcloud, acc_label, accumulated_confidence, len(pointcloud), self.config.sequence.voxel_size, self.n_label, self.dataset.config.data.name, self.config.sequence.dist_prop)
+            acc_label, accumulated_confidence = compute_labels(accumulated_pointcloud, acc_label, accumulated_confidence, len(pointcloud), self.config.sequence.voxel_size, self.n_label, self.config.source, self.config.sequence.dist_prop)
 
 
             dynamic_indices = np.where(self.dataset.get_dynamic(acc_label))[0]

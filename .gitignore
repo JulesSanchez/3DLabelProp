@@ -2,3 +2,5 @@
 *.so
 *__pycache__
 *build
+wandb
+results/

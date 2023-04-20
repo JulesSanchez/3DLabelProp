@@ -31,6 +31,7 @@ class SemanticSegmentationSPVCNNModel:
                                 in_feats=model_config.in_features_dim)
         self.model_config = model_config
         self.data_config = config
+        print("Model ready")
 
     def prepare_data(self, pointclouds, augment=True,eval=False):
         inputs = []
@@ -60,11 +61,8 @@ class SemanticSegmentationSPVCNNModel:
 
                 merged_points[:,:3] = merged_points[:,:3] * scale + noise
 
-            merged_coords = pc[:,np.array([0,1,2,3,4])]
-            if pc.shape[1] > 5:
-                merged_labels = pc[:,5]
-            else:
-                merged_labels = np.ones(len(merged_points))
+            merged_coords = pc[:,np.array([0,1,2,3])]
+            merged_labels = pc[:,4]
 
             pc_ = np.round(merged_coords[:, :3] / self.model_config.voxel_size).astype(np.int32)
             _, inds, inverse_map = sparse_quantize(pc_,
@@ -72,7 +70,10 @@ class SemanticSegmentationSPVCNNModel:
                                                 return_inverse=True)
 
             red_pc = pc_[inds]
-            feat = merged_coords[inds,: 3+self.model_config.in_features_dim]
+            feat = np.ones_like(merged_coords[inds, :1], dtype=np.float32)
+            if self.model_config.in_features_dim>1:
+                #add z, then add r
+                feat = np.hstack((feat, merged_coords[inds, 2:2+self.model_config.in_features_dim-1]))
             labels = merged_labels[inds]
             inputs.append({
                 'lidar': SparseTensor(feats=feat, coords=red_pc),

@@ -145,6 +145,7 @@ class SemanticSegmentationModel:
         except:
             self.compute_calibration()
             self.calibration()
+        print("Model ready")
 
     def compute_calibration(self,untouched_ratio=0.8):
         max_in_lim_file = join(self.path, 'kpconv_files/max_in_limits' + self.model_config.arch_type + '.pkl')
@@ -323,11 +324,9 @@ class SemanticSegmentationModel:
 
                 merged_points[:,:3] = merged_points[:,:3] * scale + noise
 
-            merged_coords = pc[:,np.array([0,1,2,3,4,-1])]
-            if pc.shape[1] > 5:
-                merged_labels = pc[:,5]
-            else:
-                merged_labels = np.ones(len(merged_points))
+            merged_coords = pc[:,np.array([0,1,2,3,-1])]
+            merged_labels = pc[:,4]
+ 
             in_pts, in_fts, in_lbls = grid_subsampling(merged_points,
                                                         features=merged_coords,
                                                         labels=merged_labels.astype(np.int32),

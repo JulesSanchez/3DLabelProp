@@ -1,6 +1,15 @@
 # 3DLabelProp
 
+![example](./images/example.png)
+Example of the segmentation error on Pandaset64 and PandasetFF with KPConv, SPVCNN and 3DLabelProp. All models trained with SemanticKITTI.
+
+This repository is the implementation of Domain generalization of 3D semantic segmentation in autonomous driving. The Paper can be found [here](https://arxiv.org/abs/2212.04245).
+
 ## Installation
+
+### Hardware and Software
+
+This repository was tested on Ubuntu 18.04, with python 3.7.13, pytorch 1.7.1, CUDA 11.1 and gcc 7.5.0.
 
 ### C++ requirements
 
@@ -22,7 +31,7 @@ This code was tested with CUDA 11.1
 
 `conda activate pytorch`
 
-`conda install pytorch==1.7.0 torchvision torchaudio cudatoolkit=11.0 -c pytorch`
+`conda install pytorch==1.7.1 torchvision torchaudio cudatoolkit=11.1 -c pytorch`
 - install other requirements
 
 `pip install -r requirements.txt`
@@ -40,7 +49,7 @@ Be careful, for training, we preprocess the dataset. For example, for SemanticKI
 
 Change the paths appropriately in the various config files (./cfg).
 
-Trajectory files can be found in: XXX. 
+Trajectory files can be found at: https://cloud.minesparis.psl.eu/index.php/s/Kbh6g54aTTih4NE. Trajectories for nuScenes, SemanticKITTI and SemanticPOSS were obtained with CT-ICP (https://github.com/jedeschaud/ct_icp).
 
 Put the unzipped folder at the root of the dataset.
 
@@ -53,12 +62,18 @@ Be careful, by default, inferences as saved on disk for future use.
 
 Change the paths appropriately in the various config files.
 
-By default, to infer a model trained on SemanticKITTI with KPConv on SemanticKITTI use:
+By default, to infer a model trained on SemanticKITTI with KPConv on PandaFF use:
 
 `python infer.py`
 
+### Add dataset and models
+Please refer to the ReadMe of the relevant sections [add a new dataset](./datasets/README.md) and [add a new model](./models/README.md)
+
 ## Trained models
-Trained models on SemanticKITTI and nuScenes with KPConv can be found at XXX.
+Trained models on SemanticKITTI and nuScenes with KPConv can be found at https://cloud.minesparis.psl.eu/index.php/s/JVFUDxAyL2IRXCQ.
+
+## Pandaset
+To compute our results on Pandaset, we extracted PandaFF and Panda64 that we put back in the sensor referential. Our preprocessed scan can be found at: [PandaFF](https://cloud.minesparis.psl.eu/index.php/s/CXMMrShTfKoLZEp) and [Panda64](https://cloud.minesparis.psl.eu/index.php/s/viYCe1ChOd668pA)
 
 ## Credits
 
@@ -67,10 +82,17 @@ Thanks to the original authors of KPConv (https://github.com/HuguesTHOMAS/KPConv
 If you use this repo please cite us:
 
 @misc{sanchez2023domain,
+
       title={Domain generalization of 3D semantic segmentation in autonomous driving}, 
+
       author={Jules Sanchez and Jean-Emmanuel Deschaud and Francois Goulette},
+
       year={2023},
+
       eprint={2212.04245},
+
       archivePrefix={arXiv},
+
       primaryClass={cs.CV}
+
 }

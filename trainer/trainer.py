@@ -26,16 +26,24 @@ class Trainer:
         self.train_dataloader = train_dataloader
         self.val_dataloader = val_dataloader
         self.config = config
+        self.config_model = model.model_config
 
         #extract info depending on dataset
-        self.n_class = self.dataloader.dataset.get_n_label()
+        self.n_class = self.train_dataloader.dataset.n_label
+        self.class_names = self.train_dataloader.dataset.get_class_names()
         self.model = model 
+        self.w =  self.train_dataloader.dataset.w
+        self.w =  torch.from_numpy(self.w).float().to(self.device)
+
 
         self.save_path = config.logger.save_path 
+        os.makedirs(self.save_path,exist_ok=True)
         self.model_name = config.logger.model_name
 
         if config.trainer.optimizer == 'SGD':
             self.optimizer = torch.optim.SGD
+        else:
+            raise  NameError('Optimizer not supported')
         self.init_optimizer()
 
 
@@ -49,6 +57,8 @@ class Trainer:
                 self.criterion_out = MixLovaszCrossEntropy(ignore_index=-1, weight = self.w)
             else:
                 self.criterion_out = MixLovaszCrossEntropy(ignore_index=-1)        
+        else:
+            raise  NameError('Criterion not supported')
         self.init_criterion()
 
         if config.trainer.scheduler == "CosineAnnealing":
@@ -57,7 +67,8 @@ class Trainer:
             self.scheduler = StepLR(self.optimizer, step_size=config.trainer.epoch_lr, gamma=config.trainer.min_lr)
         elif config.trainer.scheduler == "Exponential":
             self.scheduler = ExponentialLR(self.optimizer, gamma=config.trainer.min_lr)
-
+        else:
+            raise  NameError('Scheduler not supported')
         self.epochs = config.trainer.epoch 
 
         self.print_timing = config.trainer.step_size
@@ -73,6 +84,7 @@ class Trainer:
     def init_optimizer(self):
         # Optimizer with specific learning rate for deformable KPConv
         if self.config.architecture.model == "KPCONV":
+            print("KPConv optimizer loaded")
             deform_params = [v for k, v in self.model.model.named_parameters() if 'offset' in k]
             other_params = [v for k, v in self.model.model.named_parameters() if 'offset' not in k]
             deform_lr = self.config.trainer.lr * self.config_model.deform_lr_factor
@@ -109,7 +121,7 @@ class Trainer:
             torch.save(self.model.model.state_dict(), os.path.join(self.save_path,self.model_name))
 
     def print(self, epoch):
-        print("Epoch {}/{} : Current Train Loss {}, Current Val Loss {}, Current Val mIoU {}".format(epoch+1, self.epochs, self.step_loss, self.ev_loss, np.nanmean(self.cluster_mIoU)))
+        print("Epoch {}/{} : Current Val Loss {}, Current Val mIoU {}".format(epoch+1, self.epochs, self.ev_loss, np.nanmean(self.cluster_mIoU)))
         print("Best results at epoch {}, with best mIoU {}".format(self.best_epoch+1, np.nanmean(self.best_mIoU)))
 
     def log(self):
@@ -129,7 +141,7 @@ class Trainer:
         wandb.init(**self.parse_config_for_args())
 
     def parse_config_for_args(self):
-        return {'project':"label_propagation", 'config':self.config_extraction(), 'entity':'caor', 'name':self.config.architecture.model+'_'+self.config.data.name+'_'+self.config.trainer.criterion.split('_')[0]+'_'+self.config.data.run_name}
+        return {'project':"label_propagation", 'config':self.config_extraction(), 'entity':'caor', 'name':self.config.architecture.model+'_'+self.config.source+'_'+self.config.trainer.criterion.split('_')[0]+'_'+self.config.logger.run_name}
 
     def config_extraction(self):
         return {
@@ -140,7 +152,7 @@ class Trainer:
             "criterion":self.config.trainer.criterion,
             "cluster_param":str(self.config.cluster.n_centroids)+'_'+str(self.config.cluster.voxel_size),
             "prop_param":str(self.config.sequence.limit_GT)+'_'+str(self.config.sequence.voxel_size)+'_'+str(self.config.sequence.subsample),
-            "model_name":self.config.trainer.model_name,
+            "model_name":self.config.logger.model_name,
         }
 
     def iteration_train(self):
@@ -164,7 +176,7 @@ class Trainer:
             del outputs
             torch.cuda.empty_cache()
             self.scheduler.step()
-            if (iter_count+1)%self.evaluate_timing == 0 or iter_count == self.epochs-1:
+            if (iter_count+1)%self.config.trainer.evaluate_timing == 0 or iter_count == self.epochs-1:
                 if self.config.architecture.model == "KPCONV":
                     self.evaluate_kp()
                 elif self.config.architecture.model == "SPVCNN":
@@ -185,14 +197,15 @@ class Trainer:
     def evaluate_kp(self):
         self.ev_loss = 0
         self.cluster_mIoU = np.zeros((self.n_class, self.n_class))
-        self.model.eval()
+        self.model.model.eval()
+        dataiter = iter(self.val_dataloader)
         for _ in tqdm(range(len(self.val_dataloader))):
-            batch, cluster, r_inds = self.val_dataloader.__next__()
+            batch, cluster, r_inds = next(dataiter)
             batch.to(self.device)
             outputs = self.model.model(batch, self.config_model)
             loss = self.criterion(outputs, batch.labels, batch.neighbors[0])
             self.ev_loss += loss.cpu().detach().numpy()
-            cluster_outputs += infer_all_pc(outputs, batch, r_inds, batch.lengths[0].cpu().numpy())
+            cluster_outputs = infer_all_pc(outputs, cluster, r_inds, batch.lengths[0].cpu().numpy())
             del batch
             del loss
             del outputs
@@ -205,8 +218,9 @@ class Trainer:
         self.ev_loss = 0
         self.cluster_mIoU = np.zeros((self.n_class, self.n_class))
         self.model.eval()
+        dataiter = iter(self.val_dataloader)
         for _ in tqdm(range(len(self.val_dataloader))):
-            batch, cluster, inputs_invs = self.val_dataloader.__next__()
+            batch, cluster, inputs_invs = next(dataiter)
             batch.to(self.device)
             outputs = self.model.model(batch, self.config_model)
             loss = self.criterion(outputs, batch.labels)
