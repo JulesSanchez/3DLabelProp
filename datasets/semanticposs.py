@@ -55,4 +55,4 @@ class SemanticPOSS(PointCloudDataset):
         return len(os.listdir(osp.join(self.path,'dataset/sequences',str(self.sequence[seq_number]).zfill(2),'velodyne')))
 
     def get_poses_seq(self, seq_number):
-        return read_transfo(osp.join(osp.join(self.path,self.traj_folder),str(self.sequence[seq_number]).zfill(2)+'_traj_complete_result.txt'),False)
+        return read_transfo(osp.join(osp.join(self.path,self.traj_folder),str(self.sequence[seq_number]).zfill(2)+'_traj_complete_result.txt'),True)

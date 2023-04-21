@@ -1,7 +1,8 @@
 # 3DLabelProp
 
 ![example](./images/example.png)
-Example of the segmentation error on Pandaset64 and PandasetFF with KPConv, SPVCNN and 3DLabelProp. All models trained with SemanticKITTI.
+
+<span style="font-size:0.9em;">Example of the segmentation error on Pandaset64 and PandasetFF with KPConv, SPVCNN and 3DLabelProp. All models trained with SemanticKITTI.</span>
 
 This repository is the implementation of Domain generalization of 3D semantic segmentation in autonomous driving. The Paper can be found [here](https://arxiv.org/abs/2212.04245).
 
@@ -67,13 +68,13 @@ By default, to infer a model trained on SemanticKITTI with KPConv on PandaFF use
 `python infer.py`
 
 ### Add dataset and models
-Please refer to the ReadMe of the relevant sections [add a new dataset](./datasets/README.md) and [add a new model](./models/README.md)
+Please refer to the ReadMe of the relevant sections [add a new dataset](./datasets/README.md) and [add a new model](./models/README.md).
 
 ## Trained models
 Trained models on SemanticKITTI and nuScenes with KPConv can be found at https://cloud.minesparis.psl.eu/index.php/s/JVFUDxAyL2IRXCQ.
 
 ## Pandaset
-To compute our results on Pandaset, we extracted PandaFF and Panda64 that we put back in the sensor referential. Our preprocessed scan can be found at: [PandaFF](https://cloud.minesparis.psl.eu/index.php/s/CXMMrShTfKoLZEp) and [Panda64](https://cloud.minesparis.psl.eu/index.php/s/viYCe1ChOd668pA)
+To compute our results on Pandaset, we extracted PandaFF and Panda64 that we put back in the sensor referential. Our preprocessed scan can be found at: [PandaFF](https://cloud.minesparis.psl.eu/index.php/s/CXMMrShTfKoLZEp) and [Panda64](https://cloud.minesparis.psl.eu/index.php/s/viYCe1ChOd668pA).
 
 ## Credits
 
@@ -82,17 +83,11 @@ Thanks to the original authors of KPConv (https://github.com/HuguesTHOMAS/KPConv
 If you use this repo please cite us:
 
 @misc{sanchez2023domain,
-
       title={Domain generalization of 3D semantic segmentation in autonomous driving}, 
-
       author={Jules Sanchez and Jean-Emmanuel Deschaud and Francois Goulette},
-
       year={2023},
-
       eprint={2212.04245},
-
       archivePrefix={arXiv},
-
       primaryClass={cs.CV}
 
 }

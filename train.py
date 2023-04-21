@@ -68,11 +68,11 @@ def collate_val(data):
 #Generate dataloader
 train_dataloader = InfiniteDataLoader(
                         train_dataset,
-                        #batch_sampler = tr_samplr,
+                        batch_sampler = tr_samplr,
                         num_workers=16,
                         collate_fn=collate,
-                        batch_size=cfg.trainer.batch_size,
-                        shuffle=True
+                        #batch_size=cfg.trainer.batch_size,
+                        #shuffle=True
                     )
     
 valid_dataloader = torch.utils.data.DataLoader(

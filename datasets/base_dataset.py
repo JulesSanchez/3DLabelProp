@@ -1,6 +1,6 @@
 import numpy as np 
 
-#The labels must be between 0 and n_class-1, -1 being the ignored value
+#For training sets, the labels must be between 0 and n_class-1, -1 being the ignored value
 
 class PointCloudDataset:
     def __init__(self, config):

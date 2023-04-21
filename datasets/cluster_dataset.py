@@ -113,7 +113,7 @@ class ClusterDataset(torch.utils.data.Dataset):
         self.class_frames = []
         for i in range(self.n_label):
             integer_inds = np.where(np.logical_and(self.datalist[:, i]>10,np.sum(self.datalist[:,:-1],axis=1)<25000))[0]
-            self.class_frames.append(self.datalist[integer_inds.astype(np.int64),-1])
+            self.class_frames.append(integer_inds.astype(np.int64))
             np.random.shuffle(self.class_frames[i])
 
         class_proportions = np.sum(self.datalist[:,:-1],axis=0)
