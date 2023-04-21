@@ -24,18 +24,22 @@ This repository was tested on Ubuntu 18.04, with python 3.7.13, pytorch 1.7.1, C
 This code was tested with CUDA 11.1
 
 ### Python requirements
-If you use SPVCNN, torchsparse is a requirements. Otherwise it is optionnal but recommended.
-- install torchsparse https://github.com/mit-han-lab/torchsparse
 - install pytorch, here with conda
 
-`conda create --name pytorch python=3.7`
+`conda create --name 3DLabelProp python=3.7`
 
-`conda activate pytorch`
+`conda activate 3DLabelProp`
 
-`conda install pytorch==1.7.1 torchvision torchaudio cudatoolkit=11.1 -c pytorch`
-- install other requirements
+- install requirements
 
 `pip install -r requirements.txt`
+
+- install torch
+
+`conda install pytorch==1.7.1 torchvision torchaudio cudatoolkit=11.1 -c pytorch`
+
+If you use SPVCNN, torchsparse is a requirements. Otherwise it is optionnal but recommended.
+- install torchsparse https://github.com/mit-han-lab/torchsparse
 
 ### Compilation of C++
 
