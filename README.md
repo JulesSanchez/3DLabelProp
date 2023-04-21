@@ -50,7 +50,7 @@ If you use SPVCNN, torchsparse is a requirements. Otherwise it is optionnal but 
 ## Usage
 
 ### Train
-Be careful, for training, we preprocess the dataset. For example, for SemanticKITTI with the default parameters, you need approximately 200Go of free storage.
+Be careful, for training, we preprocess the dataset. For example, for SemanticKITTI with the default parameters, you need approximately 220Go of free storage, for nuScenes 210Go. 
 
 Change the paths appropriately in the various config files (./cfg).
 
@@ -66,6 +66,8 @@ By default, to train a model on SemanticKITTI with KPConv use:
 Be careful, by default, inferences as saved on disk for future use.
 
 Change the paths appropriately in the various config files.
+
+If you use KPConv pretrained_models, also download the "kpconv_files" folder, and put it in the folder that the clust_cfg points to (clust_cfg.savepath/source_dataset/clust_cfg.name). 
 
 By default, to infer a model trained on SemanticKITTI with KPConv on PandaFF use:
 

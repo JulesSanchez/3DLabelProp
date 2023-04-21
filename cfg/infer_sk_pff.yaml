@@ -1,7 +1,7 @@
 source: semantickitti
 target: pandaset_front
 cluster_cfg: ./cfg/clust_cfg/cluster_20_pandaFF.yaml
-model_cfg: ./cfg/model_cfg/best_kp_sk.yaml
+model_cfg: ./cfg/model_cfg/kp_sk_infer.yaml
 data_cfg_path: ./cfg/data_cfg
 subsample: 1 
 save_pred_path: ./results_3DLabelProp

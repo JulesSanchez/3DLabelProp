@@ -297,6 +297,7 @@ class SemanticSegmentationModel:
         r_mask_list = []
         t_list = []
         for pc in pointclouds:
+            pc = pc.astype(np.float32)
             #center if asked
             merged_points = pc[:,:3]
             if self.model_config.augment_center:

@@ -47,6 +47,7 @@ labels:
   40: Rolling Containers,
   41: Building,
   42: Other Static Object
+split:
   valid:
     - '064'
     - '122'
