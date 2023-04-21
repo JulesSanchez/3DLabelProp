@@ -9,7 +9,7 @@ import torch
 from trainer.trainer import Trainer
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-cfg', '--config', help='the path to the setup config file', default='cfg/setup_cfg.yaml')
+parser.add_argument('-cfg', '--config', help='the path to the setup config file', default='cfg/train_sk.yaml')
 args = parser.parse_args()
 
 cfg = OmegaConf.load(args.config)

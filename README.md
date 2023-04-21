@@ -60,7 +60,7 @@ Put the unzipped folder at the root of the dataset.
 
 By default, to train a model on SemanticKITTI with KPConv use:
 
-`python train.py`
+`python train.py -cfg ./cfg/train_sk.yaml`
 
 ### Inference
 Be careful, by default, inferences as saved on disk for future use.
@@ -69,7 +69,7 @@ Change the paths appropriately in the various config files.
 
 By default, to infer a model trained on SemanticKITTI with KPConv on PandaFF use:
 
-`python infer.py`
+`python infer.py -cfg ./cfg/infer_sk_pff.yaml`
 
 ### Add dataset and models
 Please refer to the ReadMe of the relevant sections [add a new dataset](./datasets/README.md) and [add a new model](./models/README.md).
