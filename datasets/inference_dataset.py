@@ -3,7 +3,25 @@ import torch
 import os, time
 import os.path as osp 
 from utils.slam import *
-from torchsparse.utils.quantize import sparse_quantize
+try:
+    from torchsparse.utils.quantize import sparse_quantize
+    def grid_subsample(accumulated_pointcloud,accumulated_confidence,vox_size):
+        _, indices = sparse_quantize(accumulated_pointcloud[:,:3], vox_size,return_index=True)
+        accumulated_pointcloud = accumulated_pointcloud[indices]
+        accumulated_confidence = accumulated_confidence[indices]
+        return accumulated_pointcloud,accumulated_confidence
+except:
+    import cpp_wrappers.cpp_subsampling.grid_subsampling as cpp_subsampling
+    def grid_subsample(accumulated_pointcloud, accumulated_confidence, vox_size):
+        _, fts, lbls = cpp_subsampling.subsample(accumulated_pointcloud[:,:3].astype(np.float32),
+                                                features=np.hstack((accumulated_pointcloud,accumulated_confidence)).astype(np.float32),
+                                                classes = accumulated_pointcloud[:,4].astype(np.int32).reshape(-1,1),
+                                                sampleDl=vox_size,
+                                                verbose=False)
+        accumulated_pointcloud = fts[:,:-1]
+        accumulated_pointcloud[:,4] = lbls.reshape(-1)
+        accumulated_confidence = fts[:,-1].reshape(-1,1)
+        return accumulated_pointcloud.astype(np.float64), accumulated_confidence.astype(np.float64)
 from cpp_wrappers.cpp_preprocess.propagation import compute_labels, cluster
 import random
 from multiprocessing import Pool
@@ -168,9 +186,7 @@ class InferenceDataset:
 
                 #voxelize the past sequence and remove old points
                 if len(accumulated_pointcloud) > 0:
-                    _, indices, inverse = sparse_quantize(accumulated_pointcloud[:,:3], self.config.sequence.subsample,return_index=True, return_inverse=True)
-                    accumulated_pointcloud = accumulated_pointcloud[indices]
-                    accumulated_confidence = accumulated_confidence[indices]
+                    accumulated_pointcloud, accumulated_confidence = grid_subsample(accumulated_pointcloud, accumulated_confidence, self.config.sequence.subsample)
                     accumulated_confidence = accumulated_confidence[accumulated_pointcloud[:,-1] > frame - self.config.sequence.limit_GT_time]
                     accumulated_pointcloud = accumulated_pointcloud[accumulated_pointcloud[:,-1] > frame - self.config.sequence.limit_GT_time]
 

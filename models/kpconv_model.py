@@ -6,9 +6,6 @@ import torch
 from os.path import join
 from sklearn.neighbors import KDTree
 from scipy.spatial.transform import Rotation as R
-from torchsparse import SparseTensor
-from torchsparse.utils.collate import sparse_collate_fn
-from torchsparse.utils.quantize import sparse_quantize
 
 
 class SemanticCustomBatch:
@@ -326,7 +323,7 @@ class SemanticSegmentationModel:
 
             merged_coords = pc[:,np.array([0,1,2,3,-1])]
             merged_labels = pc[:,4]
- 
+
             in_pts, in_fts, in_lbls = grid_subsampling(merged_points,
                                                         features=merged_coords,
                                                         labels=merged_labels.astype(np.int32),

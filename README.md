@@ -24,7 +24,7 @@ This repository was tested on Ubuntu 18.04, with python 3.7.13, pytorch 1.7.1, C
 This code was tested with CUDA 11.1
 
 ### Python requirements
-
+If you use SPVCNN, torchsparse is a requirements. Otherwise it is optionnal but recommended.
 - install torchsparse https://github.com/mit-han-lab/torchsparse
 - install pytorch, here with conda
 
@@ -88,6 +88,4 @@ If you use this repo please cite us:
       year={2023},
       eprint={2212.04245},
       archivePrefix={arXiv},
-      primaryClass={cs.CV}
-
-}
+      primaryClass={cs.CV}}

@@ -16,10 +16,7 @@
 
 from models.kpconv.blocks import *
 import numpy as np
-import torchsparse
-import torchsparse.nn as spnn
 from torch import nn
-from torchsparse import PointTensor
 
 __all__ = ['KPFCNN']
 

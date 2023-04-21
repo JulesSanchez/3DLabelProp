@@ -1,6 +1,6 @@
 sequence:
   out_lim: 60
-  limit_GT: 75
+  limit_GT: 75 #for PandaFF, set 300
   limit_GT_time: 15
   min_dist_mvt: 0
   voxel_size: 0.5
