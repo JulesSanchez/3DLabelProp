@@ -18,7 +18,7 @@ model_cfg = OmegaConf.load(cfg.model_cfg)
 cfg = OmegaConf.merge(cfg,cluster_cfg,model_cfg)
 
 
-if __name__ == "__main":
+if __name__ == "__main__":
 
     #Get info relative to the set. At the moment, val is required to be the same as train
     if cfg.source == "semantickitti":

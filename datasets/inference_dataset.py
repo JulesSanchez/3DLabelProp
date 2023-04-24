@@ -31,20 +31,14 @@ def per_class_iu(hist):
     with np.errstate(divide='ignore', invalid='ignore'):
         return np.diag(hist) / (hist.sum(1) + hist.sum(0) - np.diag(hist))
 
-def confmat_computations_parallel(frame_list,shift=False,label_list=np.arange(-1,19),n_process=20,source_mapping=None,target_mapping=None):
+def confmat_computations_parallel(frame_list,label_list=np.arange(-1,19),n_process=20,source_mapping=None,target_mapping=None):
     global compute_conf_mat
     def compute_conf_mat(frame):
-        try:
-            results = np.load(frame)
-        except:
-            results = np.fromfile(frame,dtype=np.int32).reshape(-1,2)
+        results = np.load(frame)
 
-        if source_mapping is None:
-            c_mat = confusion_matrix(results[:,-1].astype(np.int32)-shift,results[:,0].astype(np.int32)-shift,labels=label_list)
-        else:
-            gt = target_mapping[results[:,-1].astype(np.int32) -shift +1]
-            pred = source_mapping[results[:,0].astype(np.int32) -shift +1]
-            c_mat = confusion_matrix(gt,pred,labels=label_list)
+        gt = target_mapping[results[:,-1].astype(np.int32)]
+        pred = source_mapping[results[:,0].astype(np.int32)]
+        c_mat = confusion_matrix(gt,pred,labels=label_list)
         return c_mat
     with Pool(n_process) as p:
         all_cmat = np.array(p.map(compute_conf_mat, frame_list))
@@ -136,17 +130,17 @@ class InferenceDataset:
         labels = mapping["labels_name"]
         n_labels = len(labels)
         source_mapping = np.zeros(len(list(mapping['source_to_common'].keys()))+1) -1
-        target_mapping = np.zeros(len(list(mapping['target_to_commonn'].keys()))+1) -1
+        target_mapping = np.zeros(len(list(mapping['target_to_common'].keys()))+1) -1
         for key in mapping['source_to_common']:
             source_mapping[key+1] = mapping['source_to_common'][key]
-        for key in mapping['target_to_commonn']:
-            target_mapping[key+1] = mapping['target_to_commonn'][key]
+        for key in mapping['target_to_common']:
+            target_mapping[key+1] = mapping['target_to_common'][key]
         conf_mat = np.zeros((n_labels,n_labels))
         for i in range(len(self.trg_datast.sequence)):
             seq = self.trg_datast.sequence[i]
             seq_path = osp.join(self.save,seq)
             file_list = [os.path.join(seq_path,f) for f in  os.listdir(seq_path)]
-            conf_mat += confmat_computations_parallel(file_list, np.arange(0,n_labels),20)
+            conf_mat += confmat_computations_parallel(file_list, np.arange(0,n_labels),20,source_mapping=source_mapping,target_mapping=target_mapping)
         ius = per_class_iu(conf_mat)
         miu = np.nanmean(ius)
         return ius, miu
