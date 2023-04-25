@@ -98,7 +98,7 @@ class Lovasz_softmax(nn.Module):
 
 class CrossEntropy(nn.Module):
     def __init__(self, ignore_index=-1, weight=None):
-        super(MixLovaszCrossEntropy, self).__init__()
+        super(CrossEntropy, self).__init__()
         self.ignore_index = ignore_index
         self.ce = nn.CrossEntropyLoss(ignore_index=ignore_index, weight = weight)
     

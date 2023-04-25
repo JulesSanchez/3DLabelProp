@@ -49,10 +49,10 @@ class Trainer:
 
         if 'CE' in config.trainer.criterion:
             if 'weighted' in config.trainer.criterion:
-                self.criterion_out = CrossEntropy(weight = self.train_dataloader.w, ignore_index=-1)
+                self.criterion_out = CrossEntropy(weight = self.w, ignore_index=-1)
             else:
                 self.criterion_out = CrossEntropy(ignore_index=-1)
-        if 'Lovasz' in config.trainer.criterion:
+        elif 'Lovasz' in config.trainer.criterion:
             if 'weighted' in config.trainer.criterion:
                 self.criterion_out = MixLovaszCrossEntropy(ignore_index=-1, weight = self.w)
             else:
