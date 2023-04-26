@@ -131,14 +131,14 @@ class ClusterDataset(torch.utils.data.Dataset):
         self.init_weight()
         self.class_frames = []
         for i in range(self.n_label):
-            integer_inds = np.where(np.logical_and(self.datalist[:, i]>10,np.sum(self.datalist[:,:-1],axis=1)<25000))[0]
+            integer_inds = np.where(np.logical_and(self.datalist[:, i]>10,np.sum(self.datalist[:,:-1],axis=1)<35000))[0]
             self.class_frames.append(integer_inds.astype(np.int64))
             np.random.shuffle(self.class_frames[i])
 
         class_proportions = np.sum(self.datalist[:,:-1],axis=0)
         self.w = 1/(100*class_proportions/np.sum(class_proportions))
-        self.w[self.w<0.1] = 0.1
-        self.w[self.w>20] = 20
+        self.w[self.w<0.05] = 0.05
+        self.w[self.w>10] = 10
 
 
     def init_weight(self):

@@ -36,7 +36,7 @@ This code was tested with CUDA 11.1
 
 - install torch
 
-`conda install pytorch==1.7.1 torchvision torchaudio cudatoolkit=11.1 -c pytorch`
+`conda install pytorch==1.7.1 torchvision torchaudio cudatoolkit=11.0 -c pytorch`
 
 If you use SPVCNN, torchsparse is a requirements. Otherwise it is optionnal but recommended.
 - install torchsparse https://github.com/mit-han-lab/torchsparse

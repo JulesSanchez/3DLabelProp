@@ -101,6 +101,7 @@ class Trainer:
 
     def init_criterion(self):
         if self.config.architecture.model == "KPCONV":
+            print("KPConv criterion loaded")
             def criterion(outputs, labels, neighbors=None):
                 target = - torch.ones_like(labels)
                 for i, c in enumerate(self.model.model.valid_labels):
