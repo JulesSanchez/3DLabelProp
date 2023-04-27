@@ -158,7 +158,7 @@ class SemanticSegmentationModel:
             if 'kp' not in folder and '.yaml' not in folder:
                 seq_path = join(self.path,folder)
                 frame_list = os.listdir(seq_path)
-                for k in np.random.randint(1,len(frame_list)-1,len(frame_list)//10):
+                for k in range(1,len(frame_list)-1,len(frame_list)//5):
                     clusters = np.fromfile(join(self.path,folder,frame_list[k]),dtype=np.float32).reshape(-1,6)
                     batch, r_inds_list = self.prepare_data([clusters])
                     all_lengths += batch.lengths[0].tolist()
@@ -226,7 +226,7 @@ class SemanticSegmentationModel:
             if 'kp' not in folder and '.yaml' not in folder:
                 seq_path = join(self.path,folder)
                 frame_list = list(filter(lambda el: el.endswith('.bin'), list(os.listdir(seq_path))))
-                for k in np.random.randint(1,len(frame_list)-1,len(frame_list)//10):
+                for k in range(1,len(frame_list)-1,len(frame_list)//5):
                     clusters = np.fromfile(join(self.path,folder,frame_list[k]),dtype=np.float32).reshape(-1,6)
                     batch, r_inds_list = self.prepare_data([clusters])
                     # Control max_in_points value

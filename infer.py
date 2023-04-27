@@ -14,7 +14,7 @@ cfg = OmegaConf.load(args.config)
 cluster_cfg = OmegaConf.load(cfg.cluster_cfg)
 model_cfg = OmegaConf.load(cfg.model_cfg)
 cfg = OmegaConf.merge(cfg,cluster_cfg,model_cfg)
-if __name__ == "__main":
+if __name__ == "__main__":
     #Get info relative to the set
     if cfg.source == "semantickitti":
         source_data_cfg = OmegaConf.load(osp.join(cfg.data_cfg_path,"semantic-kitti.yaml"))
