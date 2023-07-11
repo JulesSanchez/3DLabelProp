@@ -52,10 +52,10 @@ class SemanticKITTI(PointCloudDataset):
         return np.logical_and(np.logical_not(self.get_dynamic(labels)),labels>-1)
 
     def get_sequence(self,seq_number):
-        return list(os.listdir(osp.join(self.path,'dataset/sequences',str(self.sequence[seq_number]).zfill(2)))).sort()
+        return list(os.listdir(osp.join(self.path,'dataset/sequences',self.sequence[seq_number]))).sort()
 
     def get_size_seq(self, seq_number):
-        return len(os.listdir(osp.join(self.path,'dataset/sequences',str(self.sequence[seq_number]).zfill(2),'velodyne')))
+        return len(os.listdir(osp.join(self.path,'dataset/sequences',self.sequence[seq_number],'velodyne')))
 
     def get_poses_seq(self, seq_number):
-        return read_transfo(osp.join(osp.join(self.path,self.traj_folder),str(self.sequence[seq_number]).zfill(2)+'_traj.txt'),False)
+        return read_transfo(osp.join(osp.join(self.path,self.traj_folder),self.sequence[seq_number]+'_traj.txt'),False)

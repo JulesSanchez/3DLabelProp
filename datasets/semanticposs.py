@@ -21,11 +21,14 @@ class SemanticPOSS(PointCloudDataset):
         self.path = config.data.path
         self.dynamic = np.array(dynamic)
         self.traj_folder = config.data.traj_folder
+        self.sequence_dic = {}
+        for k in range(len(self.sequence)):
+            self.sequence_dic[self.sequence[k]]= self.get_sequence(k)
 
     def loader(self, seq, frame):
         seq_path = osp.join(osp.join(self.path,'dataset/sequences'),str(seq).zfill(2))
-        pointcloud = osp.join(osp.join(seq_path,'velodyne'),str(frame).zfill(6)+'.bin')
-        label = osp.join(osp.join(seq_path,'labels'),str(frame).zfill(6)+'.label')
+        pointcloud = osp.join(seq_path,'velodyne',self.sequence_dic[seq][frame])
+        label = osp.join(seq_path,'labels',self.sequence_dic[seq][frame].replace('.bin','.label'))
         labels_read = np.fromfile(label, dtype=np.uint32)
         sem_label = (labels_read & 0xFFFF)
         pointcloud = np.fromfile(pointcloud, dtype=np.float32, count=-1).reshape((-1, 4))
@@ -49,10 +52,10 @@ class SemanticPOSS(PointCloudDataset):
         return np.logical_and(np.logical_not(self.get_dynamic(labels)),labels>-1)
 
     def get_sequence(self,seq_number):
-        return list(os.listdir(osp.join(self.path,'dataset/sequences',str(self.sequence[seq_number]).zfill(2)))).sort()
+        return sorted(list(os.listdir(osp.join(self.path,'dataset/sequences',self.sequence[seq_number],'velodyne'))))
 
     def get_size_seq(self, seq_number):
-        return len(os.listdir(osp.join(self.path,'dataset/sequences',str(self.sequence[seq_number]).zfill(2),'velodyne')))
+        return len(os.listdir(osp.join(self.path,'dataset/sequences',self.sequence[seq_number],'velodyne')))
 
     def get_poses_seq(self, seq_number):
-        return read_transfo(osp.join(osp.join(self.path,self.traj_folder),str(self.sequence[seq_number]).zfill(2)+'_traj_complete_result.txt'),True)
+        return read_transfo(osp.join(osp.join(self.path,self.traj_folder),self.sequence[seq_number]+'_traj_complete_result.txt'),True)

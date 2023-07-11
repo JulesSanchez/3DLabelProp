@@ -130,15 +130,16 @@ class ClusterDataset(torch.utils.data.Dataset):
     def get_weight(self):
         self.init_weight()
         self.class_frames = []
+        self.datalist = self.datalist[np.logical_and(np.sum(self.datalist[:,:-1],axis=1)<20000,np.sum(self.datalist[:,:-1],axis=1)>100)]
         for i in range(self.n_label):
-            integer_inds = np.where(np.logical_and(self.datalist[:, i]>10,np.sum(self.datalist[:,:-1],axis=1)<35000))[0]
+            integer_inds = np.where(self.datalist[:, i]>10)[0]
             self.class_frames.append(integer_inds.astype(np.int64))
-            np.random.shuffle(self.class_frames[i])
+            self.class_frames[i] = np.random.permutation(self.class_frames[i])
 
         class_proportions = np.sum(self.datalist[:,:-1],axis=0)
         self.w = 1/(100*class_proportions/np.sum(class_proportions))
         self.w[self.w<0.05] = 0.05
-        self.w[self.w>10] = 10
+        self.w[self.w>50] = 50
 
 
     def init_weight(self):
@@ -189,6 +190,7 @@ class ClusterDataset(torch.utils.data.Dataset):
         
         #accumulate
         lastIndex = 1
+        local_limit = self.config.sequence.limit_GT_time
         start = [i for i in range(self.config.subsample)]
         for st in start:
             for frame in tqdm(range(st,len_seq,len(start)),leave=False,desc="Sequence: " + str(self.dataset.sequence[seq_number]) + ", subsample number " +str(st+1)+"/"+str(len(start))):
@@ -198,15 +200,15 @@ class ClusterDataset(torch.utils.data.Dataset):
                         accumulated_pointcloud = accumulated_pointcloud[:-len(pointcloud)]
                         accumulated_confidence = accumulated_confidence[:-len(pointcloud)]
                         local_limit += 1
-                        lastIndex = 1
+                        lastIndex += 1
                     else:
-                        lastIndex +=1
+                        lastIndex =1
 
                     #voxelize the past sequence and remove old points
                     if len(accumulated_pointcloud) > 0:
                         accumulated_pointcloud, accumulated_confidence = grid_subsample(accumulated_pointcloud, accumulated_confidence, self.config.sequence.subsample)
-                        accumulated_confidence = accumulated_confidence[accumulated_pointcloud[:,-1] > frame - self.config.sequence.limit_GT_time]
-                        accumulated_pointcloud = accumulated_pointcloud[accumulated_pointcloud[:,-1] > frame - self.config.sequence.limit_GT_time]
+                        accumulated_confidence = accumulated_confidence[accumulated_pointcloud[:,-1] > frame - local_limit]
+                        accumulated_pointcloud = accumulated_pointcloud[accumulated_pointcloud[:,-1] > frame - local_limit]
 
                 pointcloud, label = self.dataset.loader(seq,frame)
 
@@ -242,6 +244,7 @@ class ClusterDataset(torch.utils.data.Dataset):
 
                 clusters = cluster(accumulated_pointcloud, acc_label, len(pointcloud), self.config.cluster.voxel_size, self.config.cluster.n_centroids, 'Kmeans')
 
+                clusters = list(filter(lambda e: len(e)>1,clusters))
                 clusters = [np.array(c) for c in clusters]
                 accumulated_pointcloud[:,4] = acc_label
                 pointcloud[:,4] = accumulated_pointcloud[-len(pointcloud):,4]

@@ -3,21 +3,21 @@ architecture:
   type: KPFCNN #Config to fetch
 trainer:
   epoch: 500000
-  batch_size: 1
+  batch_size: 12
   lr: 0.005
-  min_lr: 0.00001
+  min_lr: 0.001
   epoch_lr: 500000
   optimizer: SGD
   momentum: 0.98
   weight_decay: 0.0001
   balanced: True
   criterion: Lovasz_weighted
-  evaluate_timing: 75000
-  evaluate_size: 4000
+  evaluate_timing: 50000
+  evaluate_size: 500
   scheduler: CosineAnnealing
-  step_size: 750
+  step_size: 1000
   resume: 0
 logger:
   run_name: debug
   save_path: ./results
-  model_name: kp_sk.pth
+  model_name: kp_ns.pth

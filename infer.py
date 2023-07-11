@@ -46,6 +46,7 @@ if __name__ == "__main__":
         model_information = getattr(module, cfg.architecture.type)()
         model_information.num_classes = train_set.get_n_label()
         model_information.ignore_label = -1
+        model_information.in_features_dim = model_cfg.architecture.n_features
         from models.kpconv_model import SemanticSegmentationModel
         module = importlib.import_module('models.kpconv.architecture')
         model_type = getattr(module, cfg.architecture.type)
@@ -55,6 +56,7 @@ if __name__ == "__main__":
         model_information = getattr(module, cfg.architecture.type)
         model_information.num_classes = train_set.get_n_label()
         model_information.ignore_label = -1
+        model_information.in_features_dim = model_cfg.architecture.n_features
         from models.spvcnn_model import SemanticSegmentationSPVCNNModel
         model = SemanticSegmentationSPVCNNModel(model_information,cfg)
     else:

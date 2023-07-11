@@ -115,11 +115,9 @@ class Trainer:
                 return self.criterion_out(outputs, labels, neighbors)
         self.criterion = criterion
 
-    def save_model(self,final = False):
-        if final:
-            torch.save(self.model.model.state_dict(), os.path.join(self.save_path,'final_'+self.model_name))
-        else:
-            torch.save(self.model.model.state_dict(), os.path.join(self.save_path,self.model_name))
+    def save_model(self,name="final_"):
+        torch.save(self.model.model.state_dict(), os.path.join(self.save_path,name+self.model_name))
+
 
     def print(self, epoch):
         print("Epoch {}/{} : Current Val Loss {}, Current Val mIoU {}".format(epoch+1, self.epochs, self.ev_loss, np.nanmean(self.cluster_mIoU)))
@@ -169,14 +167,13 @@ class Trainer:
             loss = self.criterion(outputs, batch.labels, batch.neighbors[0])
             self.step_loss += loss.cpu().detach().numpy()
             loss.backward()
-            if self.config_model.grad_clip_norm > 0:
-                torch.nn.utils.clip_grad_value_(self.model.model.parameters(), self.config_model.grad_clip_norm)
             self.optimizer.step()
             del loss
             del batch
             del outputs
             torch.cuda.empty_cache()
-            self.scheduler.step()
+            if iter_count < self.config.trainer.epoch_lr:
+                self.scheduler.step()
             if (iter_count+1)%self.config.trainer.evaluate_timing == 0 or iter_count == self.epochs-1:
                 if self.config.architecture.model == "KPCONV":
                     self.evaluate_kp()
@@ -185,7 +182,7 @@ class Trainer:
                 if np.nanmean(self.cluster_mIoU) > np.nanmean(self.best_mIoU):
                     self.best_mIoU = self.cluster_mIoU
                     self.best_epoch = iter_count
-                    self.save_model()
+                    self.save_model("best_mIoU_")
                 self.log()
                 self.print(iter_count)
                 self.model.model.train()
@@ -200,7 +197,7 @@ class Trainer:
         self.cluster_mIoU = np.zeros((self.n_class, self.n_class))
         self.model.model.eval()
         dataiter = iter(self.val_dataloader)
-        for _ in tqdm(range(len(self.val_dataloader))):
+        for _ in tqdm(range(self.cfg.trainer.evaluate_size)):
             batch, cluster, r_inds = next(dataiter)
             batch.to(self.device)
             outputs = self.model.model(batch, self.config_model)
@@ -222,6 +219,16 @@ class Trainer:
         dataiter = iter(self.val_dataloader)
         for _ in tqdm(range(len(self.val_dataloader))):
             batch, cluster, inputs_invs = next(dataiter)
+            indices_to_keep = []
+            for k in range(len(cluster)):
+                if len(cluster[k]<15000):
+                    indices_to_keep.append(k)
+            if len(indices_to_keep) == 1 :
+                batch, cluster, inputs_invs = [batch[indices_to_keep[0]]], [cluster[indices_to_keep[0]]], [inputs_invs[indices_to_keep[0]]]
+            elif len(indices_to_keep) < 1:
+                continue
+            else:
+                batch, cluster, inputs_invs = list(map(batch.__getitem__, indices_to_keep)), list(map(cluster.__getitem__, indices_to_keep)), list(map(inputs_invs.__getitem__, indices_to_keep))
             batch.to(self.device)
             outputs = self.model.model(batch, self.config_model)
             loss = self.criterion(outputs, batch.labels)
@@ -262,5 +269,8 @@ def compute_mIoU(true_labels, pred_labels, n_labels):
     conf_mat = np.zeros((n_labels,n_labels))
     true_label_stack = np.concatenate(true_labels)
     pred_label_stack = np.concatenate(pred_labels)
-    conf_mat = confusion_matrix(true_label_stack[:,4],pred_label_stack,labels=np.arange(0,n_labels))
+    try:
+        conf_mat = confusion_matrix(true_label_stack[:,4],pred_label_stack,labels=np.arange(0,n_labels))
+    except:
+        return np.zeros((n_labels,n_labels))
     return conf_mat

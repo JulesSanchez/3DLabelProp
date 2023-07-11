@@ -35,9 +35,8 @@ def confmat_computations_parallel(frame_list,label_list=np.arange(-1,19),n_proce
     global compute_conf_mat
     def compute_conf_mat(frame):
         results = np.load(frame)
-
-        gt = target_mapping[results[:,-1].astype(np.int32)]
-        pred = source_mapping[results[:,0].astype(np.int32)]
+        gt = target_mapping[results[:,-1].astype(np.int32)+1]
+        pred = source_mapping[results[:,0].astype(np.int32)+1]
         c_mat = confusion_matrix(gt,pred,labels=label_list)
         return c_mat
     with Pool(n_process) as p:
@@ -167,7 +166,9 @@ class InferenceDataset:
         
         #accumulate
         lastIndex = 1
+        local_limit = self.config.sequence.limit_GT_time
         start = [i for i in range(self.config.subsample)]
+        #len_seq = 1000
         for st in start:
             for frame in tqdm(range(st,len_seq,len(start)),leave=False,desc="Sequence: " + str(self.trg_datast.sequence[seq_number]) + ", subsample number " +str(st+1)+"/"+str(len(start))):
                 if frame>st:
@@ -176,17 +177,24 @@ class InferenceDataset:
                         accumulated_pointcloud = accumulated_pointcloud[:-len(pointcloud)]
                         accumulated_confidence = accumulated_confidence[:-len(pointcloud)]
                         local_limit += 1
-                        lastIndex = 1
+                        lastIndex += 1
                     else:
-                        lastIndex +=1
+                        lastIndex =1
 
                     #voxelize the past sequence and remove old points
                     if len(accumulated_pointcloud) > 0:
                         accumulated_pointcloud, accumulated_confidence = grid_subsample(accumulated_pointcloud, accumulated_confidence, self.config.sequence.subsample)
-                        accumulated_confidence = accumulated_confidence[accumulated_pointcloud[:,-1] > frame - self.config.sequence.limit_GT_time]
-                        accumulated_pointcloud = accumulated_pointcloud[accumulated_pointcloud[:,-1] > frame - self.config.sequence.limit_GT_time]
+                        accumulated_confidence = accumulated_confidence[accumulated_pointcloud[:,-1] > frame - local_limit]
+                        accumulated_pointcloud = accumulated_pointcloud[accumulated_pointcloud[:,-1] > frame - local_limit]
 
                 pointcloud, label = self.trg_datast.loader(seq,frame)
+
+                # norm_curr = np.linalg.norm(pointcloud[:,:3],axis=1)
+                # pointcloud = pointcloud[norm_curr>0]
+                # label = label[norm_curr>0]
+                # norm_curr = np.linalg.norm(pointcloud[:,:3],axis=1)
+                # pointcloud = pointcloud[norm_curr<75]
+                # label = label[norm_curr<75]
 
                 local_rot, local_trans = rot[frame], trans[frame]
 
@@ -214,18 +222,18 @@ class InferenceDataset:
                 new_conf[dynamic_current] = 0
 
                 clusters = cluster(accumulated_pointcloud, acc_label, len(pointcloud), self.config.cluster.voxel_size, self.config.cluster.n_centroids, 'Kmeans')
-
+                clusters = list(filter(lambda e: len(e)>1,clusters))
                 clusters = [np.array(c) for c in clusters]
 
 
-                total_pred = self.infer_concat(self.model,[accumulated_pointcloud[c] for c in clusters],self.device,self.cfg_model,4)
+                total_pred = self.infer_concat(self.model,[accumulated_pointcloud[c] for c in clusters],self.device,self.cfg_model,1)
                 predicted_cloudwise = np.zeros((len(accumulated_pointcloud),self.n_label+1))
                 for i in range(len(clusters)):
                     predicted_cloudwise[clusters[i],1:self.n_label+1] = np.maximum(total_pred[i],predicted_cloudwise[clusters[i],1:self.n_label+1])
 
                 pred = np.argmax(predicted_cloudwise[:,:self.n_label+1], axis=1) -1
                 score = np.max(predicted_cloudwise[:,1:self.n_label+1],axis=1)
-                comp_score = score
+                comp_score = np.copy(score)
                 comp_score[comp_score>self.config.cluster.override] = 1 
 
                 accumulated_pointcloud[-len(pointcloud):,4] = np.where(new_conf[-len(pointcloud):]>comp_score[-len(pointcloud):],acc_label[-len(pointcloud):],pred[-len(pointcloud):])

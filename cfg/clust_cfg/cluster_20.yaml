@@ -1,16 +1,16 @@
 sequence:
-  out_lim: 60
-  limit_GT: 75 #for PandaFF, set 300
-  limit_GT_time: 15
-  min_dist_mvt: 0
-  voxel_size: 0.5
+  out_lim: 75
+  limit_GT: 85 #for PandaFF, set 300
+  limit_GT_time: 10
+  min_dist_mvt: 0.25
+  voxel_size: 0.8
   subsample: 0.05
   static: False
   dist_prop: 0.3
 cluster:
   voxel_size: 2
   n_centroids: 20
-  path: /media/julessanchez/SSD/
-  name: "20_2_05"
-  override: 0.5
+  path: "./results_best"
+  name: "./"
+  override: 0.3
 

@@ -119,8 +119,7 @@ class SemanticSegmentationModel:
     def __init__(self, model_config, config, model=None):
         lbl_values = [i for i in range(model_config.num_classes)]
         ign_lbls = [model_config.ignore_label]
-        #if torch.cuda.is_available():  
-        if False:  
+        if torch.cuda.is_available():  
             dev = "cuda:0" 
         else:
             dev = "cpu"
@@ -155,10 +154,10 @@ class SemanticSegmentationModel:
         all_lengths = []
         N = 1000
         for folder in os.listdir(self.path):
-            if 'kp' not in folder and '.yaml' not in folder:
+            if 'kp' not in folder and '.yaml' not in folder and "train" not in folder and "valid" not in folder:
                 seq_path = join(self.path,folder)
                 frame_list = os.listdir(seq_path)
-                for k in range(1,len(frame_list)-1,len(frame_list)//5):
+                for k in range(1,len(frame_list)-1,10):
                     clusters = np.fromfile(join(self.path,folder,frame_list[k]),dtype=np.float32).reshape(-1,6)
                     batch, r_inds_list = self.prepare_data([clusters])
                     all_lengths += batch.lengths[0].tolist()
@@ -223,10 +222,10 @@ class SemanticSegmentationModel:
 
         #self.dataset.batch_limit[0] = self.dataset.max_in_points * (self.dataset.batch_num - 1)
         for folder in os.listdir(self.path):
-            if 'kp' not in folder and '.yaml' not in folder:
+            if 'kp' not in folder and '.yaml' not in folder and "train" not in folder and "valid" not in folder:
                 seq_path = join(self.path,folder)
                 frame_list = list(filter(lambda el: el.endswith('.bin'), list(os.listdir(seq_path))))
-                for k in range(1,len(frame_list)-1,len(frame_list)//5):
+                for k in range(1,len(frame_list)-1,10):
                     clusters = np.fromfile(join(self.path,folder,frame_list[k]),dtype=np.float32).reshape(-1,6)
                     batch, r_inds_list = self.prepare_data([clusters])
                     # Control max_in_points value
@@ -349,9 +348,21 @@ class SemanticSegmentationModel:
         labels = np.concatenate(l_list, axis=0)
         features = features.astype(np.float32)
         stacked_features = np.ones_like(stacked_points[:, :1], dtype=np.float32)
-        if self.model_config.in_features_dim>1:
-            #add z, then add r
-            stacked_features = np.hstack((stacked_features, features[:, 2:2+self.model_config.in_features_dim-1]))
+        if self.model_config.in_features_dim==2:
+            #add ts
+            where = features[:,5] == np.max(features[:,5])
+            features[:,5] = - 1
+            features[where,5] = 1
+            stacked_features = np.hstack((stacked_features, features[:, -1]))
+        elif self.model_config.in_features_dim==3:
+            #add r and ts
+            do_r = np.random.uniform()
+            if do_r > 0.5:
+                features[:,3] = 1
+            where = features[:,5] == np.max(features[:,5])
+            features[:,5] = - 1
+            features[where,5] = 1
+            stacked_features = features[:, np.array([3,5])]
         input_list = self.helper_function.segmentation_inputs(stacked_points,
                                               stacked_features,
                                               labels.astype(np.int64),

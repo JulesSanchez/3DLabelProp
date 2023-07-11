@@ -37,18 +37,20 @@ if __name__ == "__main__":
         model_information = getattr(module, cfg.architecture.type)()
         model_information.num_classes = train_set.get_n_label()
         model_information.ignore_label = -1
+        model_information.in_features_dim = model_cfg.architecture.n_features
     elif cfg.architecture.model == "SPVCNN":
         module = importlib.import_module('models.spvcnn.spvcnn')
         model_information = getattr(module, cfg.architecture.type)
         model_information.num_classes = train_set.get_n_label()
         model_information.ignore_label = -1
+        model_information.in_features_dim = model_cfg.architecture.n_features
     else:
         raise  NameError('model not supported')
 
     #Get info relative to the cluster set (for training)
     train_dataset = ClusterDataset(cfg,train_set)
     valid_dataset = ClusterDataset(cfg,val_set)
-    tr_samplr = BalancedSampler(train_dataset.class_frames, train_set.get_n_label(),shuffle=50000, batch_size=cfg.trainer.batch_size)
+    tr_samplr = BalancedSampler(train_dataset.class_frames, train_set.get_n_label(),shuffle=6000, batch_size=cfg.trainer.batch_size)
 
     if cfg.architecture.model == "KPCONV":
         from models.kpconv_model import SemanticSegmentationModel
@@ -60,9 +62,10 @@ if __name__ == "__main__":
         model = SemanticSegmentationSPVCNNModel(model_information,cfg)
 
     def collate(data):
-        r_clouds, _ = model.prepare_data(data,augment=False,eval=True)
+        r_clouds, _ = model.prepare_data(data,augment=True,eval=False)
         return r_clouds
     def collate_val(data):
+        data = list(filter(lambda e: len(e)>1,data))
         r_clouds, r_inds = model.prepare_data(data,augment=False,eval=True)
         return r_clouds, data, r_inds
 
@@ -70,7 +73,7 @@ if __name__ == "__main__":
     train_dataloader = InfiniteDataLoader(
                             train_dataset,
                             batch_sampler = tr_samplr,
-                            num_workers=16,
+                            num_workers=8,
                             collate_fn=collate,
                             #batch_size=cfg.trainer.batch_size,
                             #shuffle=True
@@ -78,10 +81,10 @@ if __name__ == "__main__":
         
     valid_dataloader = torch.utils.data.DataLoader(
                             valid_dataset,
-                            num_workers=16,
-                            sampler=torch.utils.data.SubsetRandomSampler(np.random.choice(len(valid_dataset),cfg.trainer.evaluate_size,replace=False)),
+                            num_workers=8,
                             collate_fn=collate_val,
-                            batch_size=cfg.trainer.batch_size
+                            shuffle=True,
+                            batch_size=2
                         )
 
     trainer = Trainer(model,train_dataloader,valid_dataloader,cfg)
