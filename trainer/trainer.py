@@ -197,7 +197,7 @@ class Trainer:
         self.cluster_mIoU = np.zeros((self.n_class, self.n_class))
         self.model.model.eval()
         dataiter = iter(self.val_dataloader)
-        for _ in tqdm(range(self.cfg.trainer.evaluate_size)):
+        for _ in tqdm(range(self.config.trainer.evaluate_size)):
             batch, cluster, r_inds = next(dataiter)
             batch.to(self.device)
             outputs = self.model.model(batch, self.config_model)

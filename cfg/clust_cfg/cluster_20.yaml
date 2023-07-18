@@ -10,7 +10,7 @@ sequence:
 cluster:
   voxel_size: 2
   n_centroids: 20
-  path: "./results_best"
-  name: "./"
+  path: "/media/julessanchez/SSD"
+  name: "20_2_05"
   override: 0.3
 

@@ -329,7 +329,7 @@ class SemanticSegmentationModel:
                                                         labels=merged_labels.astype(np.int32),
                                                         sampleDl=self.model_config.first_subsampling_dl)
             p_list += [in_pts]
-            f_list += [in_fts[:,:-1]]
+            f_list += [in_fts]
             l_list += [in_lbls.reshape(-1)]
             t_list += [in_fts[:,-1].reshape(-1)]
             # Project predictions on the frame points
@@ -350,19 +350,19 @@ class SemanticSegmentationModel:
         stacked_features = np.ones_like(stacked_points[:, :1], dtype=np.float32)
         if self.model_config.in_features_dim==2:
             #add ts
-            where = features[:,5] == np.max(features[:,5])
-            features[:,5] = - 1
-            features[where,5] = 1
-            stacked_features = np.hstack((stacked_features, features[:, -1]))
+            where = features[:,4] == np.max(features[:,4])
+            features[:,4] = - 1
+            features[where,4] = 1
+            stacked_features = np.hstack((stacked_features, features[:, -1].reshape(-1,1)))
         elif self.model_config.in_features_dim==3:
             #add r and ts
             do_r = np.random.uniform()
             if do_r > 0.5:
                 features[:,3] = 1
-            where = features[:,5] == np.max(features[:,5])
-            features[:,5] = - 1
-            features[where,5] = 1
-            stacked_features = features[:, np.array([3,5])]
+            where = features[:,4] == np.max(features[:,4])
+            features[:,4] = - 1
+            features[where,4] = 1
+            stacked_features = features[:, np.array([3,4])]
         input_list = self.helper_function.segmentation_inputs(stacked_points,
                                               stacked_features,
                                               labels.astype(np.int64),
