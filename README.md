@@ -4,7 +4,9 @@
 
 <span style="font-size:0.9em;">Example of the segmentation error on Pandaset64 and PandasetFF with KPConv, SPVCNN and 3DLabelProp. All models trained with SemanticKITTI.</span>
 
-This repository is the implementation of Domain generalization of 3D semantic segmentation in autonomous driving. The Paper can be found [here](https://arxiv.org/abs/2212.04245).
+This repository is the implementation of Domain generalization of 3D semantic segmentation in autonomous driving. 
+
+The Paper can be found [here](https://arxiv.org/abs/2212.04245).
 
 ## Installation
 
